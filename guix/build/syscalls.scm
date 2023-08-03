@@ -1244,7 +1244,7 @@ system to PUT-OLD."
 
 (define readdir*
   ;; Decide at run time which one must be used.
-  (if (string-contains %host-type "linux-gnu")
+  (if linux?
       (readdir-procedure (c-struct-field-offset %struct-dirent-header/linux
                                                 name)
                          sizeof-dirent-header/linux
@@ -1664,7 +1664,7 @@ bytevector BV at INDEX."
            (error "unsupported socket address" sockaddr)))))
 
 (define write-socket-address!
-  (if (string-contains %host-type "linux-gnu")
+  (if linux?
       write-socket-address!/linux
       write-socket-address!/hurd))
 
@@ -1696,7 +1696,7 @@ bytevector BV at INDEX."
            (vector family)))))
 
 (define read-socket-address
-  (if (string-contains %host-type "linux-gnu")
+  (if linux?
       read-socket-address/linux
       read-socket-address/hurd))
 
