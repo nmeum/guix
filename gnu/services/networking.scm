@@ -316,25 +316,21 @@
 (define dhcp-client-shepherd-service
   (match-lambda
     ((? dhcp-client-configuration? config)
-     (let ((package (dhcp-client-configuration-package config))
-           (requirement (dhcp-client-configuration-shepherd-requirement config))
-           (provision (dhcp-client-configuration-shepherd-provision config))
-           (interfaces (dhcp-client-configuration-interfaces config))
-           (pid-file "/var/run/dhclient.pid"))
+     (let* ((package (dhcp-client-configuration-package config))
+            (client-name (package-name package))
+            (requirement (dhcp-client-configuration-shepherd-requirement config))
+            (provision (dhcp-client-configuration-shepherd-provision config))
+            (interfaces (dhcp-client-configuration-interfaces config)))
        (list (shepherd-service
               (documentation "Set up networking via DHCP.")
               (requirement `(user-processes udev ,@requirement))
               (provision provision)
+              (modules `((ice-9 popen)
+                         (ice-9 rdelim)
+                         ,@%default-modules))
 
-              ;; XXX: Running with '-nw' ("no wait") avoids blocking for a minute when
-              ;; networking is unavailable, but also means that the interface is not up
-              ;; yet when 'start' completes.  To wait for the interface to be ready, one
-              ;; should instead monitor udev events.
               (start #~(lambda _
-                         (define dhclient
-                           (string-append #$package "/sbin/dhclient"))
-
-                         ;; When invoked without any arguments, 'dhclient' discovers all
+                         ;; When invoked without any arguments, the client discovers all
                          ;; non-loopback interfaces *that are up*.  However, the relevant
                          ;; interfaces are typically down at this point.  Thus we perform
                          ;; our own interface discovery here.
@@ -355,17 +351,46 @@
                                        (_
                                         #~'#$interfaces))))
 
-                         (false-if-exception (delete-file #$pid-file))
-                         (let ((pid (fork+exec-command
-                                     ;; By default dhclient uses a
-                                     ;; pre-standardization implementation of
-                                     ;; DDNS, which is incompatable with
-                                     ;; non-ISC DHCP servers; thus, pass '-I'.
-                                     ;; <https://kb.isc.org/docs/aa-01091>.
-                                     (cons* dhclient "-nw" "-I"
-                                            "-pf" #$pid-file ifaces))))
-                           (and (zero? (cdr (waitpid pid)))
-                                (read-pid-file #$pid-file)))))
+                         ;; Returns the execution configuration for the DHCP client
+                         ;; selected by the package field of dhcp-client-configuration.
+                         ;; The configuration is a pair of pidfile and execution command
+                         ;; where the latter is a list.
+                         (define exec-config
+                           (case (string->symbol #$client-name)
+                             ((isc-dhcp)
+                              (let ((pid-file "/var/run/dhclient.pid"))
+                                (cons
+                                  (cons* (string-append #$package "/sbin/dhclient")
+                                         "-nw" "-I" "-pf" pid-file ifaces)
+                                  pid-file)))
+                             ((dhcpcd)
+                              ;; For dhcpcd, the utilized pid-file depends on the
+                              ;; command-line arguments.  If multiple interfaces are
+                              ;; given, a different pid-file is returned.  Hence, we
+                              ;; consult dhcpcd itself to determine the pid-file.
+                              (let* ((cmd (string-append #$package "/sbin/dhcpcd"))
+                                     (arg (cons* cmd "-b" ifaces)))
+                                (cons arg
+                                  (let* ((pipe (string-join (append arg '("-P")) " "))
+                                         (port (open-input-pipe pipe))
+                                         (path (read-line port)))
+                                    (close-pipe port)
+                                    path))))
+                             (else
+                               (display
+                                 "unknown 'package' value in dhcp-client-configuration"
+                                 (current-error-port))
+                               (newline (current-error-port))
+                               #f)))
+
+                         (and
+                           exec-config
+                           (let ((pid-file (cdr exec-config))
+                                 (exec-cmd (car exec-config)))
+                             (false-if-exception (delete-file pid-file))
+                             (let ((pid (fork+exec-command exec-cmd)))
+                               (and (zero? (cdr (waitpid pid)))
+                                    (read-pid-file pid-file)))))))
               (stop #~(make-kill-destructor))))))
     (package
      (warning (G_ "'dhcp-client' service now expects a \
@@ -377,10 +402,27 @@ record instead of a package.  Please adjust your configuration accordingly."))
       (dhcp-client-configuration
        (package package))))))
 
+(define (dhcp-client-account-service config)
+  (let ((package (dhcp-client-configuration-package config)))
+    ;; Contrary to other DHCP clients (e.g. dhclient), dhcpcd supports
+    ;; privilege separation.  Hence, we need to create an account here.
+    (if (string=? "dhcpcd" (package-name package))
+      (list (user-group (name "dhcpcd") (system? #t))
+            (user-account
+              (name "dhcpcd")
+              (group "dhcpcd")
+              (system? #t)
+              (comment "dhcpcd daemon user")
+              (home-directory "/var/empty")
+              (shell "/run/current-system/profile/sbin/nologin")))
+      '())))
+
 (define dhcp-client-service-type
   (service-type (name 'dhcp-client)
                 (extensions
-                 (list (service-extension shepherd-root-service-type
+                 (list (service-extension account-service-type
+                                          dhcp-client-account-service)
+                       (service-extension shepherd-root-service-type
                                           dhcp-client-shepherd-service)))
                 (default-value (dhcp-client-configuration))
                 (description "Run @command{dhcp}, a Dynamic Host Configuration
