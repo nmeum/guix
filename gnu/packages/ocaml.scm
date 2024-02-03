@@ -8350,6 +8350,25 @@ that involve memoization and recursion.")
 provide any backwards compatibility or stability guarantees.")
     (license license:expat)))
 
+(define-public ocaml-dune-private-libs
+  (package
+    (inherit dune)
+    (name "ocaml-dune-private-libs")
+    (build-system dune-build-system)
+    (arguments
+     '(#:package "dune-private-libs"
+       ;; No separate test suite from dune.
+       #:tests? #f))
+    (propagated-inputs (list ocaml-csexp ocaml-pp ocaml-dyn ocaml-stdune
+                             ocaml-odoc))
+    (synopsis "Private libraries of Dune")
+    (description
+     "This OCaml library provides several private APIs shared between
+various Dune-internal packages.  It is not intended for public use by
+the authors and does therefore not provide any stability guarantees.
+Nonetheless, many OCaml packages depend on this library.")
+    (license license:expat)))
+
 (define-public ocaml-dune-build-info
   (package
     (inherit dune)
