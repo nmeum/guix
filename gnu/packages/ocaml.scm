@@ -8333,6 +8333,23 @@ that involve memoization and recursion.")
     (description "Dynamic type")
     (license license:expat)))
 
+(define-public ocaml-stdune
+  (package
+    (inherit dune)
+    (name "ocaml-stdune")
+    (build-system dune-build-system)
+    (arguments
+     '(#:package "stdune"
+       ;; No separate test suite from dune.
+       #:tests? #f))
+    (propagated-inputs (list ocaml-dyn ocaml-ordering ocaml-pp ocaml-csexp
+                             ocaml-odoc))
+    (synopsis "Dune's unstable standard library")
+    (description
+     "This library ships the Dune standard library, the library does not
+provide any backwards compatibility or stability guarantees.")
+    (license license:expat)))
+
 (define-public ocaml-dune-build-info
   (package
     (inherit dune)
