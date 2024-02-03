@@ -8305,6 +8305,20 @@ representation.")
 that involve memoization and recursion.")
     (license license:lgpl2.0)))
 
+(define-public ocaml-ordering
+  (package
+    (inherit dune)
+    (name "ocaml-ordering")
+    (build-system dune-build-system)
+    (arguments
+     '(#:package "ordering"
+       ;; No separate test suite from dune.
+       #:tests? #f))
+    (propagated-inputs (list ocaml-odoc))
+    (synopsis "Element ordering library provided by Dune")
+    (description "Element ordering library provided by Dune.")
+    (license license:expat)))
+
 (define-public ocaml-dune-build-info
   (package
     (inherit dune)
