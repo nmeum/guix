@@ -8319,6 +8319,20 @@ that involve memoization and recursion.")
     (description "Element ordering library provided by Dune.")
     (license license:expat)))
 
+(define-public ocaml-dyn
+  (package
+    (inherit dune)
+    (name "ocaml-dyn")
+    (build-system dune-build-system)
+    (arguments
+     '(#:package "dyn"
+       ;; No separate test suite from dune.
+       #:tests? #f))
+    (propagated-inputs (list ocaml-ordering ocaml-pp ocaml-odoc))
+    (synopsis "Dynamic type")
+    (description "Dynamic type")
+    (license license:expat)))
+
 (define-public ocaml-dune-build-info
   (package
     (inherit dune)
