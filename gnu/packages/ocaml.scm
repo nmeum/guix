@@ -8369,6 +8369,21 @@ the authors and does therefore not provide any stability guarantees.
 Nonetheless, many OCaml packages depend on this library.")
     (license license:expat)))
 
+(define-public ocaml-dune-site
+  (package
+    (inherit dune)
+    (name "ocaml-dune-site")
+    (build-system dune-build-system)
+    (arguments
+     '(#:package "dune-site"
+       ;; No separate test suite from dune.
+       #:tests? #f))
+    (propagated-inputs (list ocaml-dune-private-libs ocaml-odoc))
+    (synopsis "Embed locations information inside executable and libraries")
+    (description "This OCaml library allows embedding information inside
+executable binaries and libraries, it is provided by Dune.")
+    (license license:expat)))
+
 (define-public ocaml-dune-build-info
   (package
     (inherit dune)
