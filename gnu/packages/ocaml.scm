@@ -2101,6 +2101,29 @@ it provides parser, a serializer, and a pretty printer.")
     (home-page "https://github.com/ocaml-toml/To.ml")
     (license license:expat)))
 
+(define-public ocaml-pp
+  (package
+    (name "ocaml-pp")
+    (version "1.2.0")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/ocaml-dune/pp")
+             (commit version)))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "0ylwb8lbjzj1prnal3c5p404dvh7bv4s19cvgrplnd7s46lvnj50"))))
+    (build-system dune-build-system)
+    (native-inputs (list ocaml-ppx-expect))
+    (home-page "https://github.com/ocaml-dune/pp")
+    (synopsis "Pretty-printing library")
+    (description
+     "Pretty-printing library allowing custom formatting of defined
+types and values.  The API is intended as an alternative to the
+@code{Format} module of the OCaml standard library.")
+    (license license:expat)))
+
 (define-public ocaml-topkg
   (package
     (name "ocaml-topkg")
