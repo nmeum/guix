@@ -3634,7 +3634,7 @@ MouseKeys-acceleration management.")
     (inputs
      (list wayland wayland-protocols))
     (native-inputs
-     (list pkg-config))
+     (list pkg-config scdoc))
     (synopsis "Day/night gamma adjustments for Wayland compositors")
     (home-page "https://sr.ht/~kennylevinsen/wlsunset/")
     (description
