@@ -1472,7 +1472,7 @@ libpanel, librsvg and quartz.")
 (define-public binsec
   (package
     (name "binsec")
-    (version "0.8.1")
+    (version "0.8.2")
     (source
      (origin
        (method git-fetch)
@@ -1481,7 +1481,7 @@ libpanel, librsvg and quartz.")
              (commit version)))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "0j6lwj20jaq0702v2fqvsrax1400zqbvz5q2cmjqhvrjzcfcl0kr"))))
+        (base32 "1k6prp2nc9whvxxnnqpg0f5pr7arikwv2bhzna5yq6v629i70c7q"))))
     (build-system dune-build-system)
     (native-inputs (list gmp ocaml-qcheck ocaml-ounit2))
     (propagated-inputs (list dune-site
