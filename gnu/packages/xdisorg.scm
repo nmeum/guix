@@ -720,8 +720,7 @@ following the mouse.")
      `(#:configure-flags
        (list
         "--disable-static"
-        "--enable-timers"
-        "--enable-gnuplot")))
+        "--enable-timers")))
     (native-inputs
      (list pkg-config))
     (inputs
