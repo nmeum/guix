@@ -1,0 +1,25 @@
+Patch-Source: https://github.com/chimera-linux/chimerautils/commit/b82903e6fbe37eb4feeeec259600611d46a71282
+
+By default, GNU getopt(3) will continue parsing options after the
+first nonoption. This behavior is incompatible with this find(1)
+implementation, causing parts of the expression to be parsed as
+(invalid) options.
+
+The behavior can be disabled by prefixing the option string with
+a `+` character. Other applets, such as flock or mcookie do it
+already so it would be cool to do this here too to make find(1)
+compatible with glibc.
+
+diff --git a/src.freebsd/findutils/find/main.c b/src.freebsd/findutils/find/main.c
+index 931d811..876d532 100644
+--- a/src.freebsd/findutils/find/main.c
++++ b/src.freebsd/findutils/find/main.c
+@@ -90,7 +90,7 @@ main(int argc, char *argv[])
+ 	p = start = argv;
+ 	Hflag = Lflag = 0;
+ 	ftsoptions = FTS_NOSTAT | FTS_PHYSICAL;
+-	while ((ch = getopt(argc, argv, "EHLPXdf:sx")) != -1)
++	while ((ch = getopt(argc, argv, "+EHLPXdf:sx")) != -1)
+ 		switch (ch) {
+ 		case 'E':
+ 			regexp_flags |= REG_EXTENDED;

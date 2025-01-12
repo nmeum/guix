@@ -154,6 +154,7 @@
   #:use-module (gnu packages imagemagick)
   #:use-module (gnu packages inkscape)
   #:use-module (gnu packages kerberos)
+  #:use-module (gnu packages libedit)
   #:use-module (gnu packages libbsd)
   #:use-module (gnu packages libunwind)
   #:use-module (gnu packages libusb)
@@ -668,6 +669,41 @@ environments:
 services.")
     (license license:public-domain)
     (home-page "https://cr.yp.to/daemontools.html")))
+
+(define-public chimerautils
+  (package
+    (name "chimerautils")
+    (version "14.2.0")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/chimera-linux/chimerautils")
+             (commit (string-append "v" version))))
+       (file-name (git-file-name name version))
+       (patches (search-patches "chimerautils-find-getopt-fix.patch"))
+       (sha256
+        (base32 "1z23ii57r9li4ffk9fg8q5k6n74rkzvmj2v5bcwb7dgkjanmhrn5"))))
+    (build-system meson-build-system)
+    (arguments
+     (list
+      #:tests? #f)) ;no test suite
+    (inputs (list (list zstd "lib")
+                  zlib
+                  ncurses
+                  acl
+                  libedit
+                  libxo
+                  openssl))
+    (native-inputs (list flex bison pkg-config))
+    (home-page "https://github.com/chimera-linux/chimerautils")
+    (synopsis "The FreeBSD-based core Linux userland from Chimera Linux")
+    (description
+     "This is a port of the FreeBSD userland for Linux provided by
+the Chimera Linux distribution.  Essentially, it is a collection of UNIX tools
+such as @command{grep}, @command{cp}, @command{vi}, etc. and can be used as an
+alternative to the corresponding implementations from the GNU project.")
+    (license license:bsd-2)))
 
 (define-public daemonize
   (package
