@@ -21468,6 +21468,63 @@ which provides the @code{networking} Shepherd service.
 @end table
 @end deftp
 
+@cindex DHCPCD, networking service
+
+@defvar dhcpcd-service-type
+This is a service which runs @var{dhcpcd}, an alternative Dynamic
+Host Configuration Protocol (DHCP) client.
+@end defvar
+
+@deftp {Data Type} dhcpcd-configuration
+Available @code{dhcpcd-configuration} fields are:
+
+@table @asis
+@item @code{interfaces} (default: @code{()}) (type: list)
+List of interfaces to start a DHCP client for.
+
+@item @code{command-args} (default: @code{("-q" "-q")}) (type: list)
+List of additional command-line options.
+
+@item @code{hostname} (default: @code{""}) (type: maybe-string)
+Hostname to send via DHCP, defaults to the current system hostname.
+
+@item @code{duid} (default: @code{""}) (type: maybe-string)
+Use and generate a DHCP Unique Identifier.
+
+@item @code{persistent} (default: @code{#t}) (type: boolean)
+Do not de-configure on shutdown.
+
+@item @code{option} (default: @code{("rapid_commit" "domain_name_servers" "domain_name" "domain_search" "host_name" "classless_static_routes" "interface_mtu")}) (type: list-of-strings)
+List of options to request from the server.
+
+@item @code{require} (default: @code{("dhcp_server_identifier")}) (type: list-of-strings)
+List of options to require in responses.
+
+@item @code{slaac} (default: @code{"private"}) (type: maybe-string)
+Interface identifier used for SLAAC generated IPv6 addresses.
+
+@item @code{nooption} (default: @code{()}) (type: list-of-strings)
+List of options to remove from the message before it's processed.
+
+@item @code{nohook} (default: @code{()}) (type: list-of-strings)
+List of hook script which should not be invoked.
+
+@item @code{static} (default: @code{()}) (type: list-of-strings)
+Configure a static value (e.g.  ip_address).
+
+@item @code{vendorclassid} (type: maybe-string)
+Set the DHCP Vendor Class.
+
+@item @code{clientid} (type: maybe-string)
+Use the interface hardware address or the given string as a Client ID.
+
+@item @code{extra-content} (type: maybe-string)
+Extra content to append to the configuration as-is.
+
+@end table
+@end deftp
+
+
 @cindex NetworkManager
 
 @defvar network-manager-service-type
