@@ -8218,6 +8218,54 @@ theories} problems.  It can process input in SMT-LIB format or its own
 s-expression-based format.")
    (license license:gpl3+)))
 
+(define-public symfpu
+  (let ((commit "22d993d880f66b2e470c3928e0e61bdf61419702")
+        (revision "0"))
+    (package
+      (name "symfpu")
+      (version (git-version "0" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+               (url "https://github.com/martin-cs/symfpu")
+               (commit commit)))
+         (file-name (git-file-name name version))
+         (sha256
+          (base32 "1h20zzkyi225290kc6mzg8i4dwkj0p1vlwfgc9ycs61snlyd8gr8"))))
+      (build-system copy-build-system)
+      (arguments
+       (list
+        #:install-plan
+        #~`(("symfpu.pc" "lib/pkgconfig/symfpu.pc")
+            ("core" "include/symfpu/core")
+            ("utils" "include/symfpu/utils"))
+        #:phases
+        #~(modify-phases %standard-phases
+            (add-before 'install 'build-pkgconfig
+              (lambda* (#:key outputs #:allow-other-keys)
+                (with-output-to-file "symfpu.pc"
+                  (lambda _
+                    (format #t
+                     "prefix=~a~@
+                      exec_prefix=${prefix}~@
+                      includedir=${prefix}/include~@
+                      ~@
+                      ~@
+                      Name: symfpu~@
+                      Version: ~a~@
+                      Description: library for IEEE-754 floats~@
+                      Cflags: -I${includedir}~%"
+                     (assoc-ref outputs "out")
+                     #$version))))))))
+      (synopsis
+       "Concrete and symbolic implementation of IEEE-754 floating-point numbers")
+      (description
+       "This library provides a C++ implementation of concrete and symbolic semantics
+for floating point numbers as defined in IEEE Standard for Floating-Point Arithmetic.")
+      (home-page "https://github.com/martin-cs/symfpu")
+      (license license:gpl3))))
+
 (define-public z3
   (package
     (name "z3")
