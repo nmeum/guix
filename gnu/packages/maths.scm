@@ -9840,7 +9840,7 @@ also included.")
                     #:install-plan
                     `(("build" "bin" #:include ("cadical" "mobical"))
                       ("build" "lib" #:include-regexp ("libcadical\\.(a|so)$"))
-                      ("src" "include" #:include ("cadical.h"))
+                      ("src" "include" #:include ("cadical.h" "cadical.hpp"))
                       ;; Internal headers used by cadiback.
                       ("src" "include/cadical" #:include-regexp ("\\.hpp$")))
                     args))))))
