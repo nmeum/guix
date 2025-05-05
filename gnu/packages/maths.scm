@@ -8264,7 +8264,7 @@ s-expression-based format.")
        "This library provides a C++ implementation of concrete and symbolic semantics
 for floating point numbers as defined in IEEE Standard for Floating-Point Arithmetic.")
       (home-page "https://github.com/martin-cs/symfpu")
-      (license license:gpl3))))
+      (license license:gpl3+))))
 
 (define-public bitwuzla
   (package
