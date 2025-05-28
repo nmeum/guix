@@ -3838,8 +3838,28 @@ graphic filters.  Some of its features include:
     (license license:gpl2+)
     (supported-systems (list "x86_64-linux"))))
 
+(define-public unicorn-2.0
+  (package
+    (name "unicorn")
+    (version "2.0.1.post1")
+    (source
+     (origin
+       (method url-fetch)
+       (uri (pypi-uri name version))
+       (sha256
+        (base32 "0mlfs8qfi0clyncfkbxp6in0cpl747510i6bqymwid43xcirbikz"))))
+    (build-system pyproject-build-system)
+    (native-inputs (list cmake pkg-config python-setuptools python-wheel))
+    (home-page "https://www.unicorn-engine.org")
+    (synopsis "Generic CPU emulator framework")
+    (description
+     "Uniforn is a lightweight, multi-platform, multi-architecture CPU
+  emator framework based on QEMU.")
+    (license license:gpl2+)))
+
 (define-public unicorn
   (package
+    (inherit unicorn-2.0)
     (name "unicorn")
     (version "2.1.1")
     (source
@@ -3852,15 +3872,7 @@ graphic filters.  Some of its features include:
        ;; cmake files are not in the cmake dir in pypi
        (snippet #~(substitute* "src/CMakeLists.txt"
                     (("include\\(cmake/")
-                     "include(")))))
-    (build-system pyproject-build-system)
-    (native-inputs (list cmake pkg-config python-setuptools python-wheel))
-    (home-page "https://www.unicorn-engine.org")
-    (synopsis "Generic CPU emulator framework")
-    (description
-     "Uniforn is a lightweight, multi-platform, multi-architecture CPU
-emulator framework based on QEMU.")
-    (license license:gpl2+)))
+                     "include(")))))))
 
 (define-public ppsspp
   (package
