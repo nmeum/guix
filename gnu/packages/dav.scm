@@ -24,6 +24,7 @@
 ;;; along with GNU Guix.  If not, see <http://www.gnu.org/licenses/>.
 
 (define-module (gnu packages dav)
+  #:use-module (guix build-system cargo)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (guix build-system pyproject)
@@ -42,6 +43,7 @@
   #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages sphinx)
+  #:use-module (gnu packages sqlite)
   #:use-module (gnu packages time)
   #:use-module (gnu packages tls)
   #:use-module (gnu packages version-control)
@@ -73,6 +75,49 @@ supports a variety of WebDAV features and provides an interactive
 command-line environment with support for file manipulation on remote WebDAV
 servers.")
     (license license:gpl2+)))
+
+(define-public pimsync
+  (package
+    (name "pimsync")
+    (version "0.5.2")
+    (source
+      (origin
+        (method git-fetch)
+        (uri (git-reference
+               (url "https://git.sr.ht/~whynothugo/pimsync")
+               (commit (string-append "v" version))))
+        (file-name (git-file-name name version))
+        (sha256
+          (base32 "0r8ph1gra5d9wb06c8khcz0rpjak2dcpvkvdm7aj55gdvcnx4v9d"))))
+    (build-system cargo-build-system)
+    (arguments
+      (list #:install-source? #f
+            #:phases
+            #~(modify-phases %standard-phases
+                ;; XXX: Forcefully disable experimental jmap support as it
+                ;; introduces a dependency on jmap-tools which does not compile
+                ;; with rustc-1.85.1 due to utilization of unstable rustc
+                ;; features.  Can be removed once we upgrade to rustc-1.86.X.
+                (add-after 'unpack 'disable-jmap
+                  (lambda _
+                    (substitute* "Cargo.toml"
+                      ((".*jmap.*") ""))))
+                (add-after 'unpack 'setup-environment
+                  (lambda* _
+                    (setenv "PIMSYNC_VERSION" #$version)))
+                (add-after 'install 'install-man-pages
+                  (lambda* (#:key outputs #:allow-other-keys)
+                    (let ((man (string-append #$output "/share/man/man")))
+                      (install-file "pimsync.1" (string-append man "1"))
+                      (install-file "pimsync.conf.5" (string-append man "5"))
+                      (install-file "pimsync-migration.7" (string-append man "7"))))))))
+    (inputs (cons* sqlite (cargo-inputs 'pimsync)))
+    (synopsis "Synchronize calendars and contacts using CalDAV, CardDAV and others")
+    (description "pimsync synchronizes your calendars and contacts between two
+storage locations.  The most popular purpose is to synchronize a CalDAV or
+CardDAV server with a local folder or file.")
+    (home-page "https://pimsync.whynothugo.nl/")
+    (license license:eupl1.2)))
 
 (define-public radicale
   (package
