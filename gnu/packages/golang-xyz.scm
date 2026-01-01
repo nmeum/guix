@@ -28625,6 +28625,20 @@ tools."))))
       (package-description go-github-com-d5-tengo-v2)
       "\nThis package provides a command line interface (CLI) tool."))))
 
+(define-public go-webdav
+  (package/inherit go-github-com-emersion-go-webdav
+    (name "go-webdav")
+      (arguments
+       (substitute-keyword-arguments
+           (package-arguments go-github-com-emersion-go-webdav)
+         ((#:tests? _ #t) #f)
+         ((#:install-source? _ #t) #f)
+         ((#:import-path _ "github.com/emersion/go-webdav") "github.com/emersion/go-webdav/cmd/webdav-server")
+         ((#:unpack-path _ "") "github.com/emersion/go-webdav")))
+      (native-inputs (package-propagated-inputs go-github-com-emersion-go-webdav))
+      (propagated-inputs '())
+      (inputs '())))
+
 (define-public go-gronx-tasker
   (package/inherit go-github-com-adhocore-gronx
     (name "go-gronx-tasker")
