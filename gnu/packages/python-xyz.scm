@@ -10803,7 +10803,22 @@ include_dirs = ~:*~a/include~%"
                               " and not test_square_values"
                               " and not test_sum"
                               " and not test_switch_owner"
-                              " and not test_thread_locality"))))))))
+                              " and not test_thread_locality")))))
+          ;; The executables provided by this package ('f2py' and 'numpy-config'
+          ;; via python-numpy-2) only depend on Python.  By customizing the wrap
+          ;; phase we can ensure that we don't add all Python packages listed
+          ;; in native-inputs to the closure.  This significantly reduces the
+          ;; overall closure size.
+          ;;
+          ;; See also <https://bugs.gnu.org/25235>.
+          (replace 'wrap
+                   (lambda* (#:key inputs outputs #:allow-other-keys)
+                     (for-each
+                       (lambda (program)
+                         (wrap-program program
+                                       `("GUIX_PYTHONPATH" ":" suffix
+                                         ,(list (site-packages inputs outputs)))))
+                       (find-files (in-vicinity #$output "/bin"))))))))
     (native-inputs
      (list meson-python
            pkg-config
