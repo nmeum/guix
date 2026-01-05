@@ -10914,7 +10914,16 @@ include_dirs = ~:*~a/include~%" #$(this-package-input "openblas"))))))
             (lambda* (#:key tests? test-flags #:allow-other-keys)
               (when tests?
                 (with-directory-excursion #$output
-                  (apply invoke "pytest" test-flags))))))))
+                  (apply invoke "pytest" test-flags)))))
+          ;; See comment for custom python-numpy wrap phase above.
+          (replace 'wrap
+                   (lambda* (#:key inputs outputs #:allow-other-keys)
+                     (for-each
+                       (lambda (program)
+                         (wrap-program program
+                                       `("GUIX_PYTHONPATH" ":" suffix
+                                         ,(list (site-packages inputs outputs)))))
+                       (find-files (in-vicinity #$output "/bin"))))))))
     (native-inputs
      (list gfortran
            meson-python
