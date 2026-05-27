@@ -8520,7 +8520,12 @@ s-expression-based format.")
                     Description: library for IEEE-754 floats~@
                     Cflags: -I${includedir}~%"
                    (assoc-ref outputs "out")
-                   #$version))))))))
+                   #$version)))))
+          (add-after 'install 'install-cleanup
+            (lambda _
+              (let ((inc (in-vicinity #$output "include")))
+                (delete-file (string-append inc "/symfpu/core/Makefile"))
+                (delete-file (string-append inc "/symfpu/utils/Makefile"))))))))
     (synopsis
      "Concrete and symbolic implementation of IEEE-754 floating-point numbers")
     (description
