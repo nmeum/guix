@@ -9205,37 +9205,46 @@ the parsers provided by @code{parsec}, @code{attoparsec} and @code{base}'s
     (license license:bsd-3)))
 
 (define-public ghc-path
-  (package
-    (name "ghc-path")
-    (version "0.9.6")
-    (source
-     (origin
-       (method url-fetch)
-       (uri (hackage-uri "path" version))
-       (sha256
-        (base32 "1zwrwyvlj9n1qplvxixd6rjc0y0yzjdhfvh4lwp2g42qaabhal2q"))))
-    (build-system haskell-build-system)
-    (properties '((upstream-name . "path")))
-    (inputs (list ghc-aeson ghc-hashable))
-    (native-inputs (list ghc-hspec
-                         ghc-hspec
-                         ghc-quickcheck
-                         ghc-genvalidity
-                         ghc-genvalidity-hspec
-                         ghc-hspec
-                         ghc-quickcheck
-                         ghc-genvalidity
-                         ghc-genvalidity-hspec
-                         ghc-hspec
-                         ghc-validity-bytestring))
-    (arguments
-     `(#:cabal-revision ("1"
-                         "1y4glfkxfjc3d6vhkpsp6zijqrhiymxg8lv3yi4d85crdnisnw4v")))
-    (home-page "http://hackage.haskell.org/package/path")
-    (synopsis "Support for well-typed paths")
-    (description "This package introduces a type for paths upholding useful
-invariants.")
-    (license license:bsd-3)))
+  (let ((commit "17294d1c9c185a69b79fedb8ff6c6f853a500d2e")
+        (revision "1"))
+    (package
+      (name "ghc-path")
+      (version (git-version "0.9.6" revision commit))
+      (source
+       (origin
+         (method git-fetch)
+         (uri (git-reference
+                (url "https://github.com/commercialhaskell/path.git")
+                (commit "17294d1c9c185a69b79fedb8ff6c6f853a500d2e")))
+         (sha256
+          (base32
+           "02ivlhnw8rc05zbk706fpab7607axyw2fx9jkgi5knpwwkxwwv6d"))))
+      (build-system haskell-build-system)
+      (properties '((upstream-name . "path")))
+      (inputs (list ghc-aeson ghc-hashable))
+      (arguments
+       '(#:phases
+         (modify-phases %standard-phases
+           (add-before 'configure 'update-constraints
+             (lambda _
+               (substitute* "path.cabal"
+                 (("hashable   >= 1.2     && < 1.5") "hashable")))))))
+      (native-inputs (list ghc-hspec
+                           ghc-hspec
+                           ghc-quickcheck
+                           ghc-genvalidity
+                           ghc-genvalidity-hspec
+                           ghc-hspec
+                           ghc-quickcheck
+                           ghc-genvalidity
+                           ghc-genvalidity-hspec
+                           ghc-hspec
+                           ghc-validity-bytestring))
+      (home-page "http://hackage.haskell.org/package/path")
+      (synopsis "Support for well-typed paths")
+      (description "This package introduces a type for paths upholding useful
+  invariants.")
+      (license license:bsd-3))))
 
 (define-public ghc-path-io
   (package
